@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Platform,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet
@@ -13,79 +15,54 @@ import { CategoryButton } from '@/components/category-button';
 import { Logo } from '@/components/logo';
 import { ProductCard } from '@/components/product-card';
 import { SearchBar } from '@/components/search-bar';
+import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-
-// Mock data for products
-const mockProducts = [
-  {
-    id: '1',
-    name: 'Hydrating Face Cream',
-    price: '$24.99',
-    image: null,
-  },
-  {
-    id: '2',
-    name: 'Vitamin C Serum',
-    price: '$19.99',
-    image: null,
-  },
-  {
-    id: '3',
-    name: 'Gentle Cleanser',
-    price: '$14.99',
-    image: null,
-  },
-  {
-    id: '4',
-    name: 'Sunscreen SPF 50',
-    price: '$16.99',
-    image: null,
-  },
-  {
-    id: '5',
-    name: 'Night Repair Cream',
-    price: '$29.99',
-    image: null,
-  },
-  {
-    id: '6',
-    name: 'Exfoliating Scrub',
-    price: '$12.99',
-    image: null,
-  },
-];
-
-const categories = ['All', 'Skincare', 'Makeup', 'Hair Care', 'Body Care'];
+import { useHomeWizard } from '@/hooks/useHomeWizard';
 
 export default function HomeScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [cartItemCount, setCartItemCount] = useState(0);
   const insets = useSafeAreaInsets();
+  const {
+    searchQuery,
+    selectedCategory,
+    cartItemCount,
+    products,
+    categories,
+    isLoading,
+    error,
+    setSearchQuery,
+    handleProductPress,
+    handleCartPress,
+    handleCategoryPress,
+    addToCart,
+  } = useHomeWizard();
 
-  const handleProductPress = (productId: string) => {
-    console.log('Product pressed:', productId);
-    // Navigate to product detail screen
-  };
-
-  const handleCartPress = () => {
-    console.log('Cart pressed');
-    // Navigate to cart screen
-  };
-
-  const handleCategoryPress = (category: string) => {
-    setSelectedCategory(category);
-    console.log('Category selected:', category);
-  };
-
-  const renderProduct = ({ item }: { item: typeof mockProducts[0] }) => (
+  const renderProduct = ({ item }: { item: any }) => (
     <ProductCard
       id={item.id}
       name={item.name}
       price={item.price}
-      image={item.image ?? undefined}
+      currency={item.currency}
+      image={item.image}
+      rating={item.rating}
+      discount={item.discount}
       onPress={handleProductPress}
+      onAddToCart={addToCart}
     />
+  );
+
+  const renderLoading = () => (
+    <ThemedView style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color="#279989" />
+      <ThemedText style={styles.loadingText}>Loading products...</ThemedText>
+    </ThemedView>
+  );
+
+  const renderError = () => (
+    <ThemedView style={styles.errorContainer}>
+      <ThemedText style={styles.errorText}>
+        Failed to load products. Please try again.
+      </ThemedText>
+    </ThemedView>
   );
 
   return (
@@ -137,19 +114,36 @@ export default function HomeScreen() {
         styles.productsContainer,
         { paddingBottom: Platform.OS === 'ios' ? insets.bottom : 20 }
       ]}>
-        <FlatList
-          data={mockProducts}
-          renderItem={renderProduct}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.productsList}
-          columnWrapperStyle={styles.productRow}
-        />
+        {isLoading ? (
+          renderLoading()
+        ) : error ? (
+          renderError()
+        ) : (
+          <FlatList
+            data={products}
+            renderItem={renderProduct}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.productsList}
+            columnWrapperStyle={styles.productRow}
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  // Refresh will be handled by React Query
+                }}
+                colors={['#279989']}
+                tintColor="#279989"
+              />
+            }
+          />
+        )}
       </ThemedView>
     </ThemedView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -190,5 +184,28 @@ const styles = StyleSheet.create({
   },
   productRow: {
     justifyContent: 'space-between',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ff4444',
+    textAlign: 'center',
   },
 });
