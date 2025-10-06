@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffffEE',
   },
   appName: {
     fontSize: 24,

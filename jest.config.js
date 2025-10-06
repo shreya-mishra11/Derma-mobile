@@ -1,8 +1,7 @@
 module.exports = {
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   testMatch: [
-    '**/__tests__/**/*.js',
-    '**/*.(test|spec).js'
+    '**/__tests__/**/*.(test|spec).{js,jsx,ts,tsx}',
   ],
   collectCoverageFrom: [
     'app/**/*.{ts,tsx}',
@@ -31,7 +30,13 @@ module.exports = {
     '^@lib/(.*)$': '<rootDir>/lib/$1',
     '^@constants/(.*)$': '<rootDir>/constants/$1'
   },
-  testEnvironment: 'jsdom',
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-native|@react-native|expo|@expo|@react-navigation|react-navigation|react-native-gesture-handler|react-native-safe-area-context)/)'
+  ],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   globals: {
     __DEV__: true,
   },

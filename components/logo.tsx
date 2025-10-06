@@ -40,19 +40,20 @@ const styles = StyleSheet.create({
   },
   theText: {
     fontWeight: '600',
-    color: '#333',
+    color: '#111',
     marginRight: 4,
     letterSpacing: 1,
   },
   dermaText: {
     fontWeight: 'bold',
-    color: '#333',
-    marginRight: 2,
+    color: '#111',
+    marginRight: 6,
   },
   crossContainer: {
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 2,
   },
   crossHorizontal: {
     position: 'absolute',

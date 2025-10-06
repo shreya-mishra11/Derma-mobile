@@ -10,8 +10,8 @@ interface CartIconProps {
 
 export function CartIcon({ onPress, itemCount = 0 }: CartIconProps) {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
-      <Ionicons name="bag-outline" size={24} color="#333" />
+    <TouchableOpacity onPress={onPress} style={styles.container} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+      <Ionicons name="cart" size={28} color="#279989" />
       {itemCount > 0 && (
         <View style={styles.badge}>
           <ThemedText style={styles.badgeText}>{itemCount}</ThemedText>
