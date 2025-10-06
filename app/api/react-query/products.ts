@@ -1,31 +1,14 @@
-import { Product, ProductFilters, ProductsResponse } from '@/lib/types/product';
+import { Product, ProductsResponse } from '@/lib/types/product';
 import { useQuery } from '@tanstack/react-query';
 
 const API_BASE_URL = 'https://268b1d2d159d.ngrok-free.app/api';
 
 // Fetch all products
-export const useProducts = (filters?: ProductFilters) => {
+export const useProducts = () => {
   return useQuery<ProductsResponse>({
-    queryKey: ['products', filters],
+    queryKey: ['products'],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      
-      if (filters?.category && filters.category !== 'All') {
-        params.append('category', filters.category);
-      }
-      if (filters?.search) {
-        params.append('search', filters.search);
-      }
-      if (filters?.minPrice) {
-        params.append('minPrice', filters.minPrice.toString());
-      }
-      if (filters?.maxPrice) {
-        params.append('maxPrice', filters.maxPrice.toString());
-      }
-
-      const url = `${API_BASE_URL}/products${params.toString() ? `?${params.toString()}` : ''}`;
-      
-      const response = await fetch(url, {
+      const response = await fetch(`${API_BASE_URL}/products`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
         },

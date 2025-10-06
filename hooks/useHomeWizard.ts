@@ -6,14 +6,27 @@ export const useHomeWizard = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cartItemCount, setCartItemCount] = useState(0);
 
-  const filters = useMemo(() => ({
-    search: searchQuery.trim() || undefined,
-    category: selectedCategory !== 'All' ? selectedCategory : undefined,
-  }), [searchQuery, selectedCategory]);
+  // Fetch all products once; apply filters on the client for instant UX
+  const { data: productsResponse, isLoading, error } = useProducts();
 
-  const { data: productsResponse, isLoading, error } = useProducts(filters);
+  const allProducts = productsResponse?.data || [];
 
-  const products = productsResponse?.data || [];
+  // Derived list based on UI filters
+  const products = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const activeCategory = selectedCategory;
+
+    return allProducts.filter((p) => {
+      const matchesCategory =
+        activeCategory === 'All' || p.category?.toLowerCase() === activeCategory.toLowerCase();
+      const matchesSearch =
+        query.length === 0 ||
+        p.name?.toLowerCase().includes(query) ||
+        p.description?.toLowerCase().includes(query) ||
+        p.brand?.toLowerCase().includes(query);
+      return matchesCategory && matchesSearch;
+    });
+  }, [allProducts, searchQuery, selectedCategory]);
   const categories = ['All', 'Electronics', 'Fashion', 'Wearables', 'Home & Kitchen', 'Accessories'];
 
   const handleProductPress = (productId: number) => {
