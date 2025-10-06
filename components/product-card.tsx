@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { QuantityControls } from './quantity-controls';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
@@ -13,6 +14,10 @@ interface ProductCardProps {
   discount?: number;
   onPress?: (id: number) => void;
   onAddToCart?: (id: number) => void;
+  isInCart?: boolean;
+  quantity?: number;
+  onIncrementQuantity?: (id: number) => void;
+  onDecrementQuantity?: (id: number) => void;
 }
 
 export function ProductCard({ 
@@ -24,7 +29,11 @@ export function ProductCard({
   rating,
   discount,
   onPress,
-  onAddToCart
+  onAddToCart,
+  isInCart = false,
+  quantity = 0,
+  onIncrementQuantity,
+  onDecrementQuantity
 }: ProductCardProps) {
   const [hasImageError, setHasImageError] = useState(false);
   return (
@@ -71,13 +80,21 @@ export function ProductCard({
         
         </View>
         
-        {onAddToCart && (
-          <TouchableOpacity 
-            style={styles.addToCartButton}
-            onPress={() => onAddToCart(id)}
-          >
-            <ThemedText style={styles.addToCartText}>Add to Cart</ThemedText>
-          </TouchableOpacity>
+        {isInCart ? (
+          <QuantityControls
+            quantity={quantity}
+            onIncrement={() => onIncrementQuantity?.(id)}
+            onDecrement={() => onDecrementQuantity?.(id)}
+          />
+        ) : (
+          onAddToCart && (
+            <TouchableOpacity 
+              style={styles.addToCartButton}
+              onPress={() => onAddToCart(id)}
+            >
+              <ThemedText style={styles.addToCartText}>Add to Cart</ThemedText>
+            </TouchableOpacity>
+          )
         )}
       </ThemedView>
     </TouchableOpacity>

@@ -1,3 +1,4 @@
+import { useAddToCart } from '@/app/api/react-query/cart';
 import { useProducts } from '@/app/api/react-query/products';
 import { useMemo, useState } from 'react';
 
@@ -5,9 +6,11 @@ export const useHomeWizard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [cartQuantities, setCartQuantities] = useState<Record<number, number>>({});
 
   // Fetch all products once; apply filters on the client for instant UX
   const { data: productsResponse, isLoading, error } = useProducts();
+  const addToCartMutation = useAddToCart();
 
   const allProducts = productsResponse?.data || [];
 
@@ -36,7 +39,7 @@ export const useHomeWizard = () => {
 
   const handleCartPress = () => {
     console.log('Cart pressed');
-    // Navigate to cart screen
+    // Navigation will be handled by tab navigation
   };
 
   const handleCategoryPress = (category: string) => {
@@ -45,8 +48,72 @@ export const useHomeWizard = () => {
   };
 
   const addToCart = (productId: number) => {
-    setCartItemCount(prev => prev + 1);
-    console.log('Added to cart:', productId);
+    setCartQuantities(prev => {
+      const current = prev[productId] || 0;
+      const next = current + 1;
+      if (current === 0) {
+        setCartItemCount(c => c + 1);
+      }
+      addToCartMutation.mutate({ productId, quantity: next });
+      console.log('Added to cart:', productId, 'quantity:', next);
+      return { ...prev, [productId]: next };
+    });
+  };
+
+  const updateQuantity = (productId: number, newQuantity: number) => {
+    setCartQuantities(prev => {
+      const current = prev[productId] || 0;
+      if (newQuantity <= 0) {
+        const { [productId]: _removed, ...rest } = prev;
+        if (current > 0) {
+          setCartItemCount(c => Math.max(0, c - 1));
+        }
+        addToCartMutation.mutate({ productId, quantity: 0 });
+        return rest;
+      }
+      if (current === 0) {
+        setCartItemCount(c => c + 1);
+      }
+      addToCartMutation.mutate({ productId, quantity: newQuantity });
+      return { ...prev, [productId]: newQuantity };
+    });
+  };
+
+  const incrementQuantity = (productId: number) => {
+    setCartQuantities(prev => {
+      const current = prev[productId] || 0;
+      const next = current + 1;
+      if (current === 0) {
+        setCartItemCount(c => c + 1);
+      }
+      addToCartMutation.mutate({ productId, quantity: next });
+      return { ...prev, [productId]: next };
+    });
+  };
+
+  const decrementQuantity = (productId: number) => {
+    setCartQuantities(prev => {
+      const current = prev[productId] || 0;
+      const next = current - 1;
+      if (next <= 0) {
+        const { [productId]: _removed, ...rest } = prev;
+        if (current > 0) {
+          setCartItemCount(c => Math.max(0, c - 1));
+        }
+        addToCartMutation.mutate({ productId, quantity: 0 });
+        return rest;
+      }
+      addToCartMutation.mutate({ productId, quantity: next });
+      return { ...prev, [productId]: next };
+    });
+  };
+
+  const getQuantity = (productId: number) => {
+    return cartQuantities[productId] || 0;
+  };
+
+  const isInCart = (productId: number) => {
+    return (cartQuantities[productId] || 0) > 0;
   };
 
   return {
@@ -67,5 +134,9 @@ export const useHomeWizard = () => {
     handleCartPress,
     handleCategoryPress,
     addToCart,
+    incrementQuantity,
+    decrementQuantity,
+    getQuantity,
+    isInCart,
   };
 };

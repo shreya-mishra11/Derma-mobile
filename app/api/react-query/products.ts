@@ -1,7 +1,7 @@
 import { Product, ProductsResponse } from '@/lib/types/product';
 import { useQuery } from '@tanstack/react-query';
 
-const API_BASE_URL = 'https://268b1d2d159d.ngrok-free.app/api';
+const API_BASE_URL = 'https://98d9828fc5e9.ngrok-free.app/api';
 
 // Fetch all products
 export const useProducts = () => {

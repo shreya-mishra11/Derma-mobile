@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -21,6 +22,7 @@ import { useHomeWizard } from '@/hooks/useHomeWizard';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const {
     searchQuery,
     selectedCategory,
@@ -34,6 +36,10 @@ export default function HomeScreen() {
     handleCartPress,
     handleCategoryPress,
     addToCart,
+    incrementQuantity,
+    decrementQuantity,
+    getQuantity,
+    isInCart,
   } = useHomeWizard();
 
   const renderProduct = ({ item }: { item: any }) => (
@@ -47,6 +53,10 @@ export default function HomeScreen() {
       discount={item.discount}
       onPress={handleProductPress}
       onAddToCart={addToCart}
+      isInCart={isInCart(item.id)}
+      quantity={getQuantity(item.id)}
+      onIncrementQuantity={incrementQuantity}
+      onDecrementQuantity={decrementQuantity}
     />
   );
 
@@ -76,13 +86,13 @@ export default function HomeScreen() {
       {/* Header with notch handling */}
       <ThemedView style={[
         styles.header,
-        { paddingTop: Platform.OS === 'ios' ? insets.top : 0 }
+        { paddingTop: Platform.OS === 'ios' ? insets.top : 20 }
       ]}>
         <Logo size="medium" />
-        <CartIcon 
-          onPress={handleCartPress} 
-          itemCount={cartItemCount}
-        />
+                <CartIcon
+                  onPress={() => router.push('/cart')}
+                  itemCount={cartItemCount}
+                />
       </ThemedView>
 
       {/* Search Bar */}
