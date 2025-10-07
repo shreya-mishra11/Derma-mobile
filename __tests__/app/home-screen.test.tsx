@@ -1,3 +1,12 @@
+// Mock expo-router to avoid image processing issues
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+  }),
+}));
+
 import HomeScreen from '@/app/(tabs)/index';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react-native';

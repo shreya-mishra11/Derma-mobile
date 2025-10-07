@@ -10,7 +10,7 @@ jest.mock('@/hooks/useHomeWizard', () => ({
   })),
 }));
 
-// Mock cart API hook
+// Mock cart API hooks
 jest.mock('@/app/api/react-query/cart', () => ({
   useCart: jest.fn(() => ({
     data: {
@@ -49,6 +49,12 @@ jest.mock('@/app/api/react-query/cart', () => ({
     },
     isLoading: false,
     error: null,
+  })),
+  useUpdateCartItem: jest.fn(() => ({
+    mutate: jest.fn(),
+  })),
+  useRemoveFromCart: jest.fn(() => ({
+    mutate: jest.fn(),
   })),
 }));
 

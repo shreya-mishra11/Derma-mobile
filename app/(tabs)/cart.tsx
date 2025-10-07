@@ -10,28 +10,48 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useCart } from '@/app/api/react-query/cart';
+import { useCart, useRemoveFromCart, useUpdateCartItem } from '@/app/api/react-query/cart';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useHomeWizard } from '@/hooks/useHomeWizard';
 
 export default function CartScreen() {
   const insets = useSafeAreaInsets();
-  const { incrementQuantity, decrementQuantity } = useHomeWizard();
   const { data, isLoading, error } = useCart();
+  const updateCartItem = useUpdateCartItem();
+  const removeFromCart = useRemoveFromCart();
   const cartItems = data?.data?.items ?? [];
+
+
+  const handleIncrement = (productId: number, currentQuantity: number) => {
+    updateCartItem.mutate({ productId, quantity: currentQuantity + 1 });
+  };
+
+  const handleDecrement = (productId: number, currentQuantity: number) => {
+    if (currentQuantity > 1) {
+      updateCartItem.mutate({ productId, quantity: currentQuantity - 1 });
+    } else {
+      // If quantity is 1, remove the item completely
+      removeFromCart.mutate({ productId });
+    }
+  };
+
+  const handleDelete = (productId: number) => {
+    removeFromCart.mutate({ productId });
+  };
 
   const renderCartItem = ({ item }: { item: any }) => (
     <CartItem
       product={item.product ?? item}
       quantity={item.quantity ?? 1}
-      onIncrement={() => incrementQuantity(item.productId ?? item.id)}
-      onDecrement={() => decrementQuantity(item.productId ?? item.id)}
+      productId={item.productId ?? item.id}
+      onIncrement={() => handleIncrement(item.productId ?? item.id, item.quantity ?? 1)}
+      onDecrement={() => handleDecrement(item.productId ?? item.id, item.quantity ?? 1)}
+      onDelete={() => handleDelete(item.productId ?? item.id)}
     />
   );
 
   const totalItems = data?.data?.totalItems ?? cartItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0);
-  const totalAmount = data?.data?.totalAmount ?? cartItems.reduce((sum, item) => sum + ((item.product?.price ?? item.price) * (item.quantity ?? 1)), 0);
+  const totalAmount = data?.data?.totalAmount ?? cartItems.reduce((sum, item) => sum + ((item.product?.price || 0) * (item.quantity ?? 1)), 0);
 
   return (
     <ThemedView style={styles.container}>
@@ -42,15 +62,15 @@ export default function CartScreen() {
       />
 
       {/* Header with notch handling */}
-      <ThemedView style={[
+      {/* <ThemedView style={[
         styles.header,
         { paddingTop: Platform.OS === 'ios' ? insets.top : 0 }
       ]}>
         <ThemedText style={styles.headerTitle}>Cart</ThemedText>
-      </ThemedView>
+      </ThemedView> */}
 
       {/* Delivery Address Section */}
-      <ThemedView style={styles.deliverySection}>
+      {/* <ThemedView style={styles.deliverySection}>
         <View style={styles.deliveryAddressContainer}>
           <ThemedText style={styles.deliveryLabel}>Delivery Address</ThemedText>
           <ThemedText style={styles.deliveryAddress}>
@@ -60,7 +80,7 @@ export default function CartScreen() {
         <TouchableOpacity style={styles.changeButton}>
           <ThemedText style={styles.changeText}>change</ThemedText>
         </TouchableOpacity>
-      </ThemedView>
+      </ThemedView> */}
 
       {/* Bag Items Section */}
       <ThemedView style={styles.bagSection}>
@@ -80,7 +100,7 @@ export default function CartScreen() {
           <FlatList
             data={cartItems}
             renderItem={renderCartItem}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => (item.productId).toString()}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.itemsList}
           />
@@ -112,11 +132,13 @@ export default function CartScreen() {
 interface CartItemProps {
   product: any;
   quantity: number;
+  productId: number;
   onIncrement: () => void;
   onDecrement: () => void;
+  onDelete: () => void;
 }
 
-function CartItem({ product, quantity, onIncrement, onDecrement }: CartItemProps) {
+function CartItem({ product, quantity, productId, onIncrement, onDecrement, onDelete }: CartItemProps) {
   return (
     <ThemedView style={styles.cartItem}>
       <View style={styles.itemImageContainer}>
@@ -169,7 +191,7 @@ function CartItem({ product, quantity, onIncrement, onDecrement }: CartItemProps
         <TouchableOpacity style={styles.checkmarkContainer}>
           <ThemedText style={styles.checkmark}>✓</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton}>
+        <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
           <ThemedText style={styles.deleteText}>delete</ThemedText>
         </TouchableOpacity>
       </View>

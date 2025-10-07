@@ -6,4 +6,8 @@ export const setCartId = (id?: string | null) => {
   if (id) currentCartId = id;
 };
 
+export const clearCartId = () => {
+  currentCartId = null;
+};
+
 

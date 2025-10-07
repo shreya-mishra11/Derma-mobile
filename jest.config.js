@@ -34,7 +34,7 @@ module.exports = {
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|expo|@expo|@react-navigation|react-navigation|react-native-gesture-handler|react-native-safe-area-context)/)'
+    'node_modules/(?!(react-native|@react-native|expo|@expo|@react-navigation|react-navigation|react-native-gesture-handler|react-native-safe-area-context|expo-router)/)'
   ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   globals: {

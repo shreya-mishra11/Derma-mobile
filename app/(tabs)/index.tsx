@@ -9,7 +9,7 @@ import {
   StatusBar,
   StyleSheet
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CartIcon } from '@/components/cart-icon';
 import { CategoryButton } from '@/components/category-button';
@@ -76,6 +76,7 @@ export default function HomeScreen() {
   );
 
   return (
+    <SafeAreaView style={styles.container}>
     <ThemedView style={styles.container}>
       <StatusBar 
         barStyle="dark-content" 
@@ -151,6 +152,7 @@ export default function HomeScreen() {
         )}
       </ThemedView>
     </ThemedView>
+    </SafeAreaView>
   );
 }
 
