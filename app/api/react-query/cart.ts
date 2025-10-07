@@ -1,3 +1,4 @@
+import { authHeaders } from '@/lib/auth-session';
 import { getCartId, setCartId } from '@/lib/cart-session';
 import { AddToCartRequest, AddToCartResponse, CartResponse } from '@/lib/types/cart';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -15,6 +16,7 @@ export const useAddToCart = () => {
       const requestHeaders = {
         'Content-Type': 'application/json',
         'ngrok-skip-browser-warning': 'true',
+        ...authHeaders(),
         ...(cartId ? { 'X-Cart-ID': String(cartId) } : {}),
       };
       
@@ -57,6 +59,7 @@ export const useUpdateCartItem = () => {
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
+          ...authHeaders(),
           ...(cartId ? { 'X-Cart-ID': String(cartId) } : {}),
         },
         body: JSON.stringify({ quantity }),
@@ -90,6 +93,7 @@ export const useRemoveFromCart = () => {
         method: 'DELETE',
         headers: {
           'ngrok-skip-browser-warning': 'true',
+          ...authHeaders(),
           ...(cartId ? { 'X-Cart-ID': String(cartId) } : {}),
         },
       });
@@ -120,6 +124,7 @@ export const useCart = () => {
       const response = await fetch(`${API_BASE_URL}/cart`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
+          ...authHeaders(),
           ...(getCartId() ? { 'X-Cart-ID': String(getCartId()) } : {}),
         },
       });
@@ -129,6 +134,7 @@ export const useCart = () => {
       const json = await response.json();
       // Persist cartId from server if present (body or header)
       const bodyCartId = (json as any)?.data?.cartId;
+      console.log("bodyCartId>>>>>", bodyCartId);
       const headerCartId = response.headers?.get?.('x-cart-id') || response.headers?.get?.('X-Cart-ID');
       const newCartId = bodyCartId || headerCartId;
       if (newCartId) setCartId(String(newCartId));

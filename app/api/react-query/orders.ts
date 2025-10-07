@@ -1,3 +1,4 @@
+import { authHeaders } from '@/lib/auth-session';
 import { getCartId, hydrateCartIdIfNeeded, setCartId } from '@/lib/cart-session';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -71,6 +72,7 @@ export const useCreateOrder = () => {
       let headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'ngrok-skip-browser-warning': 'true',
+        ...authHeaders(),
       };
 
       let body: any = {};
@@ -78,8 +80,8 @@ export const useCreateOrder = () => {
       if (isDirectOrder) {
         // Direct order: send productId, quantity, and paymentMethod if provided
         body = {
-          productId: args.productId,
-          quantity: args.quantity,
+          // productId: args.productId,
+          // quantity: args.quantity,
           ...(args.paymentMethod ? { paymentMethod: args.paymentMethod as 'cash' | 'card' | 'upi' } : {}),
         };
       } else {
@@ -147,6 +149,7 @@ export const useOrders = () => {
       const response = await fetch(`${API_BASE_URL}/orders`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
+          ...authHeaders(),
         },
       });
 

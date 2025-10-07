@@ -1,3 +1,4 @@
+import { authHeaders } from '@/lib/auth-session';
 import { Product, ProductsResponse } from '@/lib/types/product';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,6 +12,7 @@ export const useProducts = () => {
       const response = await fetch(`${API_BASE_URL}/products`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
+          ...authHeaders(),
         },
       });
 
@@ -33,6 +35,7 @@ export const useProduct = (id: number) => {
       const response = await fetch(`${API_BASE_URL}/products/${id}`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
+          ...authHeaders(),
         },
       });
 

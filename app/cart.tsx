@@ -28,6 +28,7 @@ export default function CartScreen() {
   const removeFromCart = useRemoveFromCart();
   const createOrder = useCreateOrder();
   const cartItems = data?.data?.items ?? [];
+  console.log("cartItems>>>>>", cartItems);
   const [showCheckout, setShowCheckout] = useState(false);
 
 
@@ -75,6 +76,14 @@ export default function CartScreen() {
       { productId, quantity, paymentMethod: paymentMethod as 'cash' | 'card' | 'upi' },
       {
         onSuccess: (data) => {
+          // After successful order, remove items from cart (client-side cleanup)
+          try {
+            cartItems.forEach((ci: any) => {
+              const id = ci.itemId ?? ci.id;
+              if (id) removeFromCart.mutate({ itemId: String(id) });
+            });
+          } catch {}
+
           // Navigate to success screen with order details
           router.push({
             pathname: '/order-success',

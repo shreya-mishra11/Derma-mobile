@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import React from 'react';
 import {
-    ActivityIndicator,
-    FlatList,
-    Platform,
-    RefreshControl,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -22,10 +22,13 @@ import { SearchBar } from '@/components/search-bar';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useHomeWizard } from '@/hooks/useHomeWizard';
+import { getCurrentUser, signOut } from '@/lib/auth-session';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const user = getCurrentUser();
+  if (!user) return <Redirect href="/login" />;
   const {
     searchQuery,
     selectedCategory,
@@ -90,6 +93,12 @@ export default function HomeScreen() {
       ]}>
         <Logo size="medium" />
         <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.pastOrdersButton}
+            onPress={() => { signOut(); router.replace('/login'); }}
+          >
+            <Ionicons name="log-out-outline" size={24} color="#279989" />
+          </TouchableOpacity>
           <TouchableOpacity 
             style={styles.pastOrdersButton}
             onPress={() => router.push('/past-orders')}
