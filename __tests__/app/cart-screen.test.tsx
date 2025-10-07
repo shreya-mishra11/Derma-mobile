@@ -21,7 +21,7 @@ jest.mock('@/app/api/react-query/cart', () => ({
         totalAmount: 400,
         items: [
           {
-            productId: 1,
+            itemId: 'item-1',
             quantity: 2,
             product: {
               id: 1,
@@ -33,7 +33,7 @@ jest.mock('@/app/api/react-query/cart', () => ({
             },
           },
           {
-            productId: 2,
+            itemId: 'item-2',
             quantity: 1,
             product: {
               id: 2,

@@ -51,15 +51,8 @@ export const useHomeWizard = () => {
   };
 
   const addToCart = (productId: number) => {
-    console.log('addToCart called for product:', productId);
-    console.log('Current cart items:', cartItems);
-    console.log('Cart response:', cartResponse);
-    
     const existingItem = cartItems.find(item => item.productId === productId);
     const currentQuantity = existingItem?.quantity || 0;
-    
-    console.log('Existing item:', existingItem);
-    console.log('Current quantity:', currentQuantity);
     
     addToCartMutation.mutate(
       { productId, quantity: currentQuantity + 1 },
@@ -72,7 +65,6 @@ export const useHomeWizard = () => {
         }
       }
     );
-    console.log('Added to cart:', productId, 'quantity:', currentQuantity + 1);
   };
 
   const getQuantity = (productId: number) => {

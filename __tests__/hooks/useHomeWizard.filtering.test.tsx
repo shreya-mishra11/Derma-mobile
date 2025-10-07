@@ -76,6 +76,28 @@ const mockProducts = [
   },
 ];
 
+// Mock the cart API
+jest.mock('@/app/api/react-query/cart', () => ({
+  useAddToCart: () => ({
+    mutate: jest.fn(),
+    isLoading: false,
+    error: null,
+  }),
+  useCart: () => ({
+    data: {
+      success: true,
+      data: {
+        cartId: 'cart-1',
+        totalItems: 0,
+        totalAmount: 0,
+        items: [],
+      },
+    },
+    isLoading: false,
+    error: null,
+  }),
+}));
+
 jest.mock('@/app/api/react-query/products', () => ({
   useProducts: () => ({
     data: { success: true, data: mockProducts, count: mockProducts.length },

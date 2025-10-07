@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   FlatList,
@@ -22,31 +23,31 @@ export default function CartScreen() {
   const cartItems = data?.data?.items ?? [];
 
 
-  const handleIncrement = (productId: number, currentQuantity: number) => {
-    updateCartItem.mutate({ productId, quantity: currentQuantity + 1 });
+  const handleIncrement = (itemId: string, currentQuantity: number) => {
+    updateCartItem.mutate({ itemId, quantity: currentQuantity + 1 });
   };
 
-  const handleDecrement = (productId: number, currentQuantity: number) => {
+  const handleDecrement = (itemId: string, currentQuantity: number) => {
     if (currentQuantity > 1) {
-      updateCartItem.mutate({ productId, quantity: currentQuantity - 1 });
+      updateCartItem.mutate({ itemId, quantity: currentQuantity - 1 });
     } else {
       // If quantity is 1, remove the item completely
-      removeFromCart.mutate({ productId });
+      removeFromCart.mutate({ itemId });
     }
   };
 
-  const handleDelete = (productId: number) => {
-    removeFromCart.mutate({ productId });
+  const handleDelete = (itemId: string) => {
+    removeFromCart.mutate({ itemId });
   };
 
   const renderCartItem = ({ item }: { item: any }) => (
     <CartItem
       product={item.product ?? item}
       quantity={item.quantity ?? 1}
-      productId={item.productId ?? item.id}
-      onIncrement={() => handleIncrement(item.productId ?? item.id, item.quantity ?? 1)}
-      onDecrement={() => handleDecrement(item.productId ?? item.id, item.quantity ?? 1)}
-      onDelete={() => handleDelete(item.productId ?? item.id)}
+      itemId={item.itemId ?? item.id}
+      onIncrement={() => handleIncrement(item.itemId ?? item.id, item.quantity ?? 1)}
+      onDecrement={() => handleDecrement(item.itemId ?? item.id, item.quantity ?? 1)}
+      onDelete={() => handleDelete(item.itemId ?? item.id)}
     />
   );
 
@@ -85,7 +86,7 @@ export default function CartScreen() {
       {/* Bag Items Section */}
       <ThemedView style={styles.bagSection}>
         <ThemedText style={styles.bagTitle}>
-          Bag Items ({totalItems}/{totalItems} selected)
+          Bag Items 
         </ThemedText>
         
         {isLoading ? (
@@ -100,7 +101,7 @@ export default function CartScreen() {
           <FlatList
             data={cartItems}
             renderItem={renderCartItem}
-            keyExtractor={(item) => (item.productId).toString()}
+            keyExtractor={(item) => (item.itemId ?? item.id).toString()}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.itemsList}
           />
@@ -132,13 +133,13 @@ export default function CartScreen() {
 interface CartItemProps {
   product: any;
   quantity: number;
-  productId: number;
+  itemId: string;
   onIncrement: () => void;
   onDecrement: () => void;
   onDelete: () => void;
 }
 
-function CartItem({ product, quantity, productId, onIncrement, onDecrement, onDelete }: CartItemProps) {
+function CartItem({ product, quantity, itemId, onIncrement, onDecrement, onDelete }: CartItemProps) {
   return (
     <ThemedView style={styles.cartItem}>
       <View style={styles.itemImageContainer}>
@@ -184,17 +185,14 @@ function CartItem({ product, quantity, productId, onIncrement, onDecrement, onDe
               <ThemedText style={styles.quantityButtonText}>+</ThemedText>
             </TouchableOpacity>
           </View>
+          {/* <View style={styles.itemActions}> */}
+        <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+          <Ionicons name="trash-outline" size={20} color="#ff4444" />
+        </TouchableOpacity>
         </View>
       </View>
       
-      <View style={styles.itemActions}>
-        <TouchableOpacity style={styles.checkmarkContainer}>
-          <ThemedText style={styles.checkmark}>✓</ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
-          <ThemedText style={styles.deleteText}>delete</ThemedText>
-        </TouchableOpacity>
-      </View>
+  
     </ThemedView>
   );
 }
@@ -262,6 +260,7 @@ const styles = StyleSheet.create({
   },
   itemsList: {
     paddingBottom: 20,
+    paddingTop: 8,
   },
   emptyCart: {
     flex: 1,
@@ -276,13 +275,27 @@ const styles = StyleSheet.create({
   cartItem: {
     flexDirection: 'row',
     paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+    alignItems: 'flex-start',
+    backgroundColor: '#fff',
+    marginHorizontal: 0,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   itemImageContainer: {
     width: 80,
     height: 80,
-    marginRight: 12,
+    marginRight: 16,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   itemImage: {
     width: '100%',
@@ -305,28 +318,36 @@ const styles = StyleSheet.create({
   itemDetails: {
     flex: 1,
     justifyContent: 'space-between',
+    // paddingVertical: 0,
+    height: 80,
+    paddingRight: 8,
+    paddingBottom: 0,
   },
   itemName: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
+    // marginBottom: 6,
+    lineHeight: 20,
   },
   itemDescription: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 4,
+    // marginBottom: 6,
+    // lineHeight: 18,
   },
   itemPrice: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#279989',
-    marginBottom: 8,
+    // marginBottom: 12,
   },
   quantityRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: 'auto',
+    paddingBottom: 0,
   },
   quantityLabel: {
     fontSize: 14,
@@ -368,30 +389,29 @@ const styles = StyleSheet.create({
   },
   itemActions: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingLeft: 12,
-  },
-  checkmarkContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#279989',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
+    justifyContent: 'flex-end',
+    paddingLeft: 8,
+    minWidth: 40,
+    height: 80,
+    paddingBottom: 0,
   },
   deleteButton: {
-    paddingVertical: 4,
-  },
-  deleteText: {
-    fontSize: 12,
-    color: '#ff4444',
-    fontWeight: '500',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ff4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   bottomSection: {
     paddingHorizontal: 16,

@@ -11,10 +11,6 @@ export const useAddToCart = () => {
   return useMutation<AddToCartResponse, Error, AddToCartRequest>({
     mutationFn: async ({ productId, quantity }) => {
       const cartId = getCartId();
-      console.log('AddToCart - Cart ID:', cartId);
-      console.log('AddToCart - Request:', { productId, quantity });
-      console.log('AddToCart - API URL:', `${API_BASE_URL}/cart`);
-      
       const requestBody = { productId, quantity };
       const requestHeaders = {
         'Content-Type': 'application/json',
@@ -22,17 +18,11 @@ export const useAddToCart = () => {
         ...(cartId ? { 'X-Cart-ID': String(cartId) } : {}),
       };
       
-      console.log('AddToCart - Request headers:', requestHeaders);
-      console.log('AddToCart - Request body:', requestBody);
-      
       const response = await fetch(`${API_BASE_URL}/cart`, {
         method: 'POST',
         headers: requestHeaders,
         body: JSON.stringify(requestBody),
       });
-
-      console.log('AddToCart - Response status:', response.status);
-      console.log('AddToCart - Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -43,11 +33,8 @@ export const useAddToCart = () => {
       }
 
       const json = await response.json();
-      console.log('AddToCart - Response data:', json);
-      
       const newCartId = json?.data?.cartId;
       if (newCartId) {
-        console.log('AddToCart - Setting new cart ID:', newCartId);
         setCartId(newCartId);
       }
       return json;
@@ -62,20 +49,22 @@ export const useAddToCart = () => {
 // Hook for updating cart item quantity
 export const useUpdateCartItem = () => {
   const queryClient = useQueryClient();
-  return useMutation<CartResponse, Error, AddToCartRequest>({
-    mutationFn: async (item: AddToCartRequest) => {
-      const response = await fetch(`${API_BASE_URL}/cart`, {
-        method: 'PUT',
+  return useMutation<CartResponse, Error, { itemId: string; quantity: number }>({
+    mutationFn: async ({ itemId, quantity }) => {
+      const cartId = getCartId();
+      const response = await fetch(`${API_BASE_URL}/cart/${itemId}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
-          ...(getCartId() ? { 'X-Cart-ID': String(getCartId()) } : {}),
+          ...(cartId ? { 'X-Cart-ID': String(cartId) } : {}),
         },
-        body: JSON.stringify(item),
+        body: JSON.stringify({ quantity }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update cart item');
+        const errorText = await response.text();
+        throw new Error(`Failed to update cart item: ${errorText}`);
       }
 
       const json = await response.json();
@@ -92,18 +81,20 @@ export const useUpdateCartItem = () => {
 // Hook for removing item from cart
 export const useRemoveFromCart = () => {
   const queryClient = useQueryClient();
-  return useMutation<CartResponse, Error, { productId: number }>({
-    mutationFn: async ({ productId }) => {
-      const response = await fetch(`${API_BASE_URL}/cart/${productId}`, {
+  return useMutation<CartResponse, Error, { itemId: string }>({
+    mutationFn: async ({ itemId }) => {
+      const cartId = getCartId();
+      const response = await fetch(`${API_BASE_URL}/cart/${itemId}`, {
         method: 'DELETE',
         headers: {
           'ngrok-skip-browser-warning': 'true',
-          ...(getCartId() ? { 'X-Cart-ID': String(getCartId()) } : {}),
+          ...(cartId ? { 'X-Cart-ID': String(cartId) } : {}),
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to remove item from cart');
+        const errorText = await response.text();
+        throw new Error(`Failed to remove item from cart: ${errorText}`);
       }
 
       const json = await response.json();
