@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { QuantityControls } from './quantity-controls';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
@@ -81,11 +80,12 @@ export function ProductCard({
         </View>
         
         {isInCart ? (
-          <QuantityControls
-            quantity={quantity}
-            onIncrement={() => onIncrementQuantity?.(id)}
-            onDecrement={() => onDecrementQuantity?.(id)}
-          />
+             <TouchableOpacity 
+             style={styles.addToCartButtonDisabled}
+             disabled={true}
+           >
+             <ThemedText style={styles.addToCartText}>Added to Cart</ThemedText>
+           </TouchableOpacity>
         ) : (
           onAddToCart && (
             <TouchableOpacity 
@@ -181,6 +181,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
     alignItems: 'center',
+  },
+  addToCartButtonDisabled: {
+    backgroundColor: '#e9ecef',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    color: 'black',
   },
   addToCartText: {
     color: '#fff',

@@ -36,8 +36,6 @@ export default function HomeScreen() {
     handleCartPress,
     handleCategoryPress,
     addToCart,
-    incrementQuantity,
-    decrementQuantity,
     getQuantity,
     isInCart,
   } = useHomeWizard();
@@ -55,8 +53,6 @@ export default function HomeScreen() {
       onAddToCart={addToCart}
       isInCart={isInCart(item.id)}
       quantity={getQuantity(item.id)}
-      onIncrementQuantity={incrementQuantity}
-      onDecrementQuantity={decrementQuantity}
     />
   );
 
