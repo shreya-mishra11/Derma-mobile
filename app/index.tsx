@@ -1,13 +1,13 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  RefreshControl,
-  ScrollView,
-  StatusBar,
-  StyleSheet
+    ActivityIndicator,
+    FlatList,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StatusBar,
+    StyleSheet
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 

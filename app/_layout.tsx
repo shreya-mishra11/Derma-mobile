@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
 });
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: 'index',
 };
 
 export default function RootLayout() {
@@ -29,8 +29,8 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="cart" options={{ title: 'Cart' }} />
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="cart" options={{ title: 'Cart' }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           </Stack>
           <StatusBar style="auto" />
