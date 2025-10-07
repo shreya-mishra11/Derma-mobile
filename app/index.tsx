@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
@@ -7,7 +8,9 @@ import {
     RefreshControl,
     ScrollView,
     StatusBar,
-    StyleSheet
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -86,10 +89,18 @@ export default function HomeScreen() {
         { paddingTop: Platform.OS === 'ios' ? insets.top : 20 }
       ]}>
         <Logo size="medium" />
-                <CartIcon
-                  onPress={() => router.push('/cart')}
-                  itemCount={cartItemCount}
-                />
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.pastOrdersButton}
+            onPress={() => router.push('/past-orders')}
+          >
+            <Ionicons name="receipt-outline" size={24} color="#279989" />
+          </TouchableOpacity>
+          <CartIcon
+            onPress={() => router.push('/cart')}
+            itemCount={cartItemCount}
+          />
+        </View>
       </ThemedView>
 
       {/* Search Bar */}
@@ -168,6 +179,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     backgroundColor: '#ffffffEE',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  pastOrdersButton: {
+    padding: 8,
+    marginRight: 8,
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
   },
   appName: {
     fontSize: 24,

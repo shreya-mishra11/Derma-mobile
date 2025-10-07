@@ -1,26 +1,34 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
-    FlatList,
-    Image,
-    Platform,
-    StatusBar,
-    StyleSheet,
-    TouchableOpacity,
-    View
+  Alert,
+  FlatList,
+  Image,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useCart, useRemoveFromCart, useUpdateCartItem } from '@/app/api/react-query/cart';
+import { useCreateOrder } from '@/app/api/react-query/orders';
+import { CheckoutForm } from '@/components/checkout-form';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { hydrateCartIdIfNeeded } from '@/lib/cart-session';
 
 export default function CartScreen() {
   const insets = useSafeAreaInsets();
-  const { data, isLoading, error } = useCart();
+  const router = useRouter();
+  const { data, isLoading, error, refetch } = useCart();
   const updateCartItem = useUpdateCartItem();
   const removeFromCart = useRemoveFromCart();
+  const createOrder = useCreateOrder();
   const cartItems = data?.data?.items ?? [];
+  const [showCheckout, setShowCheckout] = useState(false);
 
 
   const handleIncrement = (itemId: string, currentQuantity: number) => {
@@ -40,6 +48,53 @@ export default function CartScreen() {
     removeFromCart.mutate({ itemId });
   };
 
+  const handleProceedToPay = async () => {
+    if (cartItems.length === 0) {
+      Alert.alert('Cart is empty', 'Please add items to your cart before checkout.');
+      return;
+    }
+    // Hydrate cartId by refetching cart once before showing checkout
+    try {
+      await hydrateCartIdIfNeeded();
+      await refetch();
+    } catch {}
+    setShowCheckout(true);
+  };
+
+  const handleCreateOrder = async (_customerInfo: any, paymentMethod: string) => {
+    // Direct order: send productId and quantity from the first cart item
+    const first = cartItems[0];
+    if (!first) {
+      Alert.alert('Cart is empty', 'Please add items to your cart before checkout.');
+      return;
+    }
+    const productId = first.product?.id ?? first.productId ?? first.id;
+    const quantity = first.quantity ?? 1;
+
+    createOrder.mutate(
+      { productId, quantity, paymentMethod: paymentMethod as 'cash' | 'card' | 'upi' },
+      {
+        onSuccess: (data) => {
+          // Navigate to success screen with order details
+          router.push({
+            pathname: '/order-success',
+            params: {
+              orderId: data.data.orderId,
+              totalAmount: data.data.totalAmount.toString(),
+            },
+          });
+        },
+        onError: (error) => {
+          Alert.alert(
+            'Order Failed',
+            error.message || 'Failed to create order. Please try again.',
+            [{ text: 'OK' }]
+          );
+        },
+      }
+    );
+  };
+
   const renderCartItem = ({ item }: { item: any }) => (
     <CartItem
       product={item.product ?? item}
@@ -54,6 +109,24 @@ export default function CartScreen() {
   const totalItems = data?.data?.totalItems ?? cartItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0);
   const totalAmount = data?.data?.totalAmount ?? cartItems.reduce((sum, item) => sum + ((item.product?.price || 0) * (item.quantity ?? 1)), 0);
 
+  if (showCheckout) {
+    return (
+      <ThemedView style={styles.container}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="#fff"
+          translucent={Platform.OS === 'android'}
+        />
+        
+        <CheckoutForm
+          totalAmount={totalAmount}
+          onProceed={handleCreateOrder}
+          isLoading={createOrder.isPending}
+        />
+      </ThemedView>
+    );
+  }
+
   return (
     <ThemedView style={styles.container}>
       <StatusBar
@@ -61,27 +134,6 @@ export default function CartScreen() {
         backgroundColor="#fff"
         translucent={Platform.OS === 'android'}
       />
-
-      {/* Header with notch handling */}
-      {/* <ThemedView style={[
-        styles.header,
-        { paddingTop: Platform.OS === 'ios' ? insets.top : 0 }
-      ]}>
-        <ThemedText style={styles.headerTitle}>Cart</ThemedText>
-      </ThemedView> */}
-
-      {/* Delivery Address Section */}
-      {/* <ThemedView style={styles.deliverySection}>
-        <View style={styles.deliveryAddressContainer}>
-          <ThemedText style={styles.deliveryLabel}>Delivery Address</ThemedText>
-          <ThemedText style={styles.deliveryAddress}>
-            123 Main Street, City, State 12345
-          </ThemedText>
-        </View>
-        <TouchableOpacity style={styles.changeButton}>
-          <ThemedText style={styles.changeText}>change</ThemedText>
-        </TouchableOpacity>
-      </ThemedView> */}
 
       {/* Bag Items Section */}
       <ThemedView style={styles.bagSection}>
@@ -121,7 +173,7 @@ export default function CartScreen() {
           <View style={styles.totalContainer}>
             <ThemedText style={styles.totalLabel}>Total: INR {totalAmount}</ThemedText>
           </View>
-          <TouchableOpacity style={styles.proceedButton}>
+          <TouchableOpacity style={styles.proceedButton} onPress={handleProceedToPay}>
             <ThemedText style={styles.proceedButtonText}>Proceed to Pay</ThemedText>
           </TouchableOpacity>
         </ThemedView>

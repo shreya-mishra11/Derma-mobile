@@ -33,10 +33,10 @@ export const useAddToCart = () => {
       }
 
       const json = await response.json();
-      const newCartId = json?.data?.cartId;
-      if (newCartId) {
-        setCartId(newCartId);
-      }
+      const bodyCartId = json?.data?.cartId;
+      const headerCartId = response.headers?.get?.('x-cart-id') || response.headers?.get?.('X-Cart-ID');
+      const newCartId = bodyCartId || headerCartId;
+      if (newCartId) setCartId(String(newCartId));
       return json;
     },
     onSuccess: () => {
@@ -68,8 +68,10 @@ export const useUpdateCartItem = () => {
       }
 
       const json = await response.json();
-      const newCartId = json?.data?.cartId;
-      if (newCartId) setCartId(newCartId);
+      const bodyCartId = json?.data?.cartId;
+      const headerCartId = response.headers?.get?.('x-cart-id') || response.headers?.get?.('X-Cart-ID');
+      const newCartId = bodyCartId || headerCartId;
+      if (newCartId) setCartId(String(newCartId));
       return json;
     },
     onSuccess: () => {
@@ -98,8 +100,10 @@ export const useRemoveFromCart = () => {
       }
 
       const json = await response.json();
-      const newCartId = json?.data?.cartId;
-      if (newCartId) setCartId(newCartId);
+      const bodyCartId = json?.data?.cartId;
+      const headerCartId = response.headers?.get?.('x-cart-id') || response.headers?.get?.('X-Cart-ID');
+      const newCartId = bodyCartId || headerCartId;
+      if (newCartId) setCartId(String(newCartId));
       return json;
     },
     onSuccess: () => {
@@ -122,7 +126,13 @@ export const useCart = () => {
       if (!response.ok) {
         throw new Error('Failed to fetch cart');
       }
-      return response.json();
+      const json = await response.json();
+      // Persist cartId from server if present (body or header)
+      const bodyCartId = (json as any)?.data?.cartId;
+      const headerCartId = response.headers?.get?.('x-cart-id') || response.headers?.get?.('X-Cart-ID');
+      const newCartId = bodyCartId || headerCartId;
+      if (newCartId) setCartId(String(newCartId));
+      return json;
     },
     staleTime: 60_000,
   });

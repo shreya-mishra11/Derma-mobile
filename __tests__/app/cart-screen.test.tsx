@@ -58,6 +58,29 @@ jest.mock('@/app/api/react-query/cart', () => ({
   })),
 }));
 
+// Mock orders API hooks
+jest.mock('@/app/api/react-query/orders', () => ({
+  useCreateOrder: jest.fn(() => ({
+    mutate: jest.fn(),
+    isPending: false,
+  })),
+}));
+
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+  }),
+  useLocalSearchParams: () => ({}),
+}));
+
+// Mock CheckoutForm component
+jest.mock('@/components/checkout-form', () => ({
+  CheckoutForm: ({ onProceed, totalAmount }: any) => null,
+}));
+
 import CartScreen from '@/app/cart';
 
 describe('CartScreen', () => {
